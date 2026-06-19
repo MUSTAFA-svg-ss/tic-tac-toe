@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Separate Squares Tic-Tac-Toe</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .status {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* The Grid: This separates the squares */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            /* This gap creates the physical space between each square */
+            gap: 15px; 
+            background-color: transparent;
+        }
+
+        /* Styling individual separate squares */
+        .cell {
+            background-color: #ffffff;
+            border: none;
+            border-radius: 12px; /* Gives them a sleek, rounded look */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Hover effect to make it feel responsive */
+        .cell:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background-color: #f8f9fa;
+        }
+
+        /* X and O specific colors */
+        .cell.x {
+            color: #ff4757;
+        }
+
+        .cell.o {
+            color: #2ed573;
+        }
+
+        /* Reset button */
+        .reset-btn {
+            margin-top: 25px;
+            padding: 10px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            background-color: #1e90ff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .reset-btn:hover {
+            background-color: #0071e3;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Tic-Tac-Toe</h1>
+    <div class="status" id="status">Player X's turn</div>
+
+    <div class="board" id="board">
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+        <button class="cell" data-cell></button>
+    </div>
+
+    <button class="reset-btn" id="resetBtn">Restart Game</button>
+
+    <script>
+        const cells = document.querySelectorAll('[data-cell]');
+        const statusText = document.getElementById('status');
+        const resetBtn = document.getElementById('resetBtn');
+        
+        let oTurn = false;
+        let gameActive = true;
+
+        const WINNING_COMBINATIONS = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]             // Diagonals
+        ];
+
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleClick, { once: true });
+        });
+
+        resetBtn.addEventListener('click', restartGame);
+
+        function handleClick(e) {
+            const cell = e.target;
+            if (!gameActive) return;
+
+            const currentClass = oTurn ? 'o' : 'x';
+            placeMark(cell, currentClass);
+
+            if (checkWin(currentClass)) {
+                endGame(false);
+            } else if (isDraw()) {
+                endGame(true);
+            } else {
+                swapTurns();
+            }
+        }
+
+        function placeMark(cell, currentClass) {
+            cell.innerText = currentClass.toUpperCase();
+            cell.classList.add(currentClass);
+        }
+
+        function swapTurns() {
+            oTurn = !oTurn;
+            statusText.innerText = `Player ${oTurn ? "O" : "X"}'s turn`;
+        }
+
+        function checkWin(currentClass) {
+            return WINNING_COMBINATIONS.some(combination => {
+                return combination.every(index => {
+                    return cells[index].classList.contains(currentClass);
+                });
+            });
+        }
+
+        function isDraw() {
+            return [...cells].every(cell => {
+                return cell.classList.contains('x') || cell.classList.contains('o');
+            });
+        }
+
+        function endGame(draw) {
+            gameActive = false;
+            if (draw) {
+                statusText.innerText = "It's a Draw!";
+            } else {
+                statusText.innerText = `Player ${oTurn ? "O" : "X"} Wins!`;
+            }
+        }
+
+        function restartGame() {
+            oTurn = false;
+            gameActive = true;
+            statusText.innerText = "Player X's turn";
+            cells.forEach(cell => {
+                cell.innerText = '';
+                cell.classList.remove('x');
+                cell.classList.remove('o');
+                cell.removeEventListener('click', handleClick);
+                cell.addEventListener('click', handleClick, { once: true });
+            });
+        }
+    </script>
+</body>
+</html>
